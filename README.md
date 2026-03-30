@@ -1,58 +1,177 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Pharmacovigilance Test
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Author:** Mauro Ramírez  
+**Laravel Version:** 13.2.0  
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Project Description
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+This project implements a Pharmacovigilance module that allows identifying customers who purchased medications associated with a specific lot number within a defined date range and sending alert notifications.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The system includes authentication, medication search, orders retrieval, customer details, and alert logging.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Setup Instructions
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
+### 1. Clone repository
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+git clone https://github.com/IngMauroRamirez/prueba_pharmacovigilance.git
+cd pharmacovigilance
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+### 2. Install dependencies
+```bash
+composer install
+npm install
+```
 
-## Contributing
+### 3. Enviroment configuration
+Copy .env file:
+```bash
+cp .env.example .env
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Create a database named:
 
-## Code of Conduct
+```bash
+pharmacovigilance
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Using collation:
 
-## Security Vulnerabilities
+```bash
+utf8mb4_unicode_ci
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Then update your ``.env`` file with the following database configuration:
 
-## License
+```bash
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=pharmacovigilance
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 4. Generate application key
+```bash
+php artisan key:generate
+```
+
+### 5. Run migrations and seeders
+```bash
+php artisan migrate --seed
+```
+This will create the database schema and populate it with sample data.
+
+### 6. Run development server
+```bash
+php artisan serve
+```
+Access the system at
+```bash
+http://127.0.0.1:8000/pharmacovigilance/login
+```
+
+### 7. Run Frontend assets
+```bash
+npm run dev
+```
+
+---
+
+## API Endpoints
+```bash
+POST   /api/login
+GET    /api/medications/search
+GET    /api/orders/{id}/{lot_number}
+GET    /api/customers/{id}
+POST   /api/alerts/send
+```
+
+---
+
+## Database Schema
+
+Main entities:
+
+- Users
+- Customers
+- Medications
+- Orders
+- Order_Items
+- Alerts
+
+Relationships:
+
+- Orders belong to Customers
+- Orders have many Order_Items
+- Order_Items belong to Medications
+- Alerts reference Customers and Orders
+
+All schema definitions are implemented using Laravel migrations located in:
+
+```bash
+database/migrations
+```
+
+For more information see the image located in:
+
+```bash
+public/docs/db_schema.png
+```
+
+---
+
+## Sample Seed Data
+
+Sample data is generated using Laravel seeders located in:
+
+```bash
+database/seeders
+```
+
+To generate sample data:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+---
+
+## Design Decisions
+
+### Blade + Auth Middleware
+
+Blade views combined with Vue components were used instead of a full SPA to simplify session-based authentication. Blade allows direct use of Laravel's ``auth`` middleware, making it easier to protect routes without implementing token-based authentication. This approach reduces project complexity and complies with the requirement allowing session-based authentication. Additionally, the ``auth`` middleware ensures only authenticated users can access the pharmacovigilance module.
+
+### DataTables via CDN
+
+DataTables was integrated using CDN instead of installing via NPM to avoid increasing project build complexity. This approach allowed quick implementation of pagination without modifying Laravel build configuration. Since the goal was to meet pagination requirements, CDN provided a lightweight and efficient solution suitable for this technical test.
+
+### Use of Eloquent ORM and Relationships
+
+Eloquent ORM was used for database queries due to its native Laravel integration and ability to manage table relationships clearly and maintainably. Using relationships such as ``hasMany``, ``belongsTo``, and eager loading with ``with``, reduced manual SQL complexity and improved code readability. Additionally, eager loading prevented N+1 query issues and optimized performance when retrieving related orders, customers, and medications.
+
+---
+
+## Assumptions
+
+### Seeder Usage for Sample Data
+
+Seeders were used to generate sample data in order to optimize development time and avoid manually writing multiple insert statements. This allowed quick population of users, customers, medications, and orders required to test system functionality.
+
+### Alert Sending Simulation
+
+Email alert sending was simulated by generating an informational message indicating that the alert was sent. This simulation allowed storing alert records in the ``alerts`` table, fulfilling the functional requirement without configuring a real email service. The implemented functionality demonstrates the notification flow and audit logging.
+
+### Pagination
+
+Pagination is implemented using DataTables integrated via CDN.
+
+### Logout Button
+
+I implemented the logout button to more clearly illustrate the topic of login using the session-based authentication method.
