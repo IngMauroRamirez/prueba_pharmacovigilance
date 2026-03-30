@@ -126,6 +126,19 @@ public/docs/db_schema.png
 
 ---
 
+## Database Schema
+
+The database structure dump is included in:
+
+```bash
+public/docs/pharmacovigilance_schema.sql
+```
+
+This file contains the schema definition without data.
+
+
+---
+
 ## Sample Seed Data
 
 Sample data is generated using Laravel seeders located in:
