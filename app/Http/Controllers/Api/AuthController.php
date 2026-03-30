@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
+    /* Login function to validate user authentication using an auth method and form field validations for the login form. */
     public function login (Request $request){
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -24,5 +25,17 @@ class AuthController extends Controller
             'message' => 'Login successful',
             'user' => Auth::user()
         ]);
+    }
+
+    /* Function to return the Blade view for the login form. */
+    public function showLogin(){
+        return view('pharmacovigilance.login');
+    }
+
+    public function logout(){
+        Auth::logout();
+        request()->session()->invalidate();
+        request()->session()->regenerateToken();
+        
     }
 }

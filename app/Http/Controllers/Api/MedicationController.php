@@ -9,6 +9,11 @@ use Carbon\Carbon;
 
 class MedicationController extends Controller
 {
+    
+    /* 
+        This function returns all orders that contain a specific medication (by its batch) and 
+        whose purchase date falls within a given range, including customer and medication details, sorted from the most recent to the oldest.
+     */
     public function search(Request $request){
         $validated = $request->validate([
             'lot' => 'required|string',
@@ -25,7 +30,13 @@ class MedicationController extends Controller
         })
         ->with([
             'customer',
-            'items.medication'
+            'items' => function ($query) use ($validated) {
+                $query->whereHas('medication', function ($q) use ($validated) {
+                    $q->where('lot_number', $validated['lot']);
+                })->with(['medication' => function ($q) use ($validated) {
+                    $q->where('lot_number', $validated['lot']);
+                }]);
+            }
         ])
         ->orderBy('purchase_date', 'desc')
         ->get();
@@ -40,5 +51,10 @@ class MedicationController extends Controller
         return response()->json([
             'data' => $orders_list
         ]);
+    }
+
+    /* Function to return the orders search view. */
+    public function showSeach(){
+        return view('pharmacovigilance.search');
     }
 }

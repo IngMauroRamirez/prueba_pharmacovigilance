@@ -8,12 +8,18 @@ use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function show_order($id){
+    /* Function to return the information of an order based on the batch number. */
+    public function show_order($id, $lot_number){
         $order = Order::with([
             'customer',
-            'items.medication'
-        ])
-        ->find($id);
+            'items' => function ($query) use ($lot_number) {
+                $query->whereHas('medication', function ($q) use ($lot_number){
+                    $q->where('lot_number', $lot_number);
+                })->with(['medication' => function ($q) use ($lot_number) {
+                    $q->where('lot_number', $lot_number);
+                }]);
+            }
+        ])->find($id);
 
         if(!$order){
             return response()->json([
